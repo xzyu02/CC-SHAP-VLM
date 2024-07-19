@@ -73,10 +73,10 @@ print(f"Done loading model and tokenizer after {time.time()-t1:.2f}s.")
 # print(vlm_classify(prompt, raw_image, model, tokenizer, labels=['Y', 'X', 'A', 'B', 'var' ,'Y']))
 # print(f"This script so far (generation) needed {time.time()-t1:.2f}s.")
 
-with torch.no_grad():
-    helper_model = AutoModelForCausalLM.from_pretrained(MODELS['llama2-13b-chat'], torch_dtype=torch.float16, device_map="auto", token=True)
-helper_tokenizer = AutoTokenizer.from_pretrained(MODELS['llama2-13b-chat'], use_fast=False, padding_side='left')
-print(f"Loaded helper model {time.time()-t1:.2f}s.")
+# with torch.no_grad():
+#     helper_model = AutoModelForCausalLM.from_pretrained(MODELS['llama2-13b-chat'], torch_dtype=torch.float16, device_map="auto", token=True)
+# helper_tokenizer = AutoTokenizer.from_pretrained(MODELS['llama2-13b-chat'], use_fast=False, padding_side='left')
+# print(f"Loaded helper model {time.time()-t1:.2f}s.")
 
 # print(lm_generate('I enjoy walking with my cute dog.', helper_model, helper_tokenizer, max_new_tokens=max_new_tokens))
 

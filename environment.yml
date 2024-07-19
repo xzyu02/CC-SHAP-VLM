@@ -126,7 +126,6 @@ dependencies:
   - tk
   - tokenizers
   - tqdm
-  - transformers
   - triton
   - ucx
   - wheel
@@ -152,6 +151,10 @@ dependencies:
     - nvidia-nvjitlink-cu12
     - nvidia-nvtx-cu12
     - lion-pytorch
-    - libre2
-    - en-core-web-sm
     - torch
+    - transformers==4.40
+    - scikit-learn
+    - slicer
+    - cloudpickle
+    - nltk
+    - spacy

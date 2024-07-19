@@ -1,4 +1,15 @@
 # CC-SHAP for VLMs 🖼️
+
+## Getting Start
+
+```
+conda env create -f environment.yml
+conda activate vlm-shap
+python -m spacy download en_core_web_sm
+
+python faithfulness.py <c_task> <model_name> <num_samples> <save_json> <data_root>
+```
+
 Official code implementation for the paper "Do Vision &amp; Language Decoders use Images and Text equally? How Self-consistent are their Explanations?" https://arxiv.org/abs/2404.18624
 
 This is follow-up work building on the paper "On Measuring Faithfulness of Natural Language Explanations" https://arxiv.org/abs/2311.07466  that developed CC-SHAP and applied it to LLMs 📃.
