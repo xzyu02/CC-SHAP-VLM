@@ -26,7 +26,6 @@ dependencies:
   - aws-checksums
   - aws-crt-cpp
   - aws-sdk-cpp
-  - bitsandbytes
   - c-ares
   - cmake
   - colorama
@@ -152,9 +151,11 @@ dependencies:
     - nvidia-nvtx-cu12
     - lion-pytorch
     - torch
+    - bitsandbytes
     - transformers==4.40
     - scikit-learn
     - slicer
     - cloudpickle
     - nltk
     - spacy
+    

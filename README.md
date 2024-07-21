@@ -5,7 +5,9 @@
 ```
 conda env create -f environment.yml
 conda activate vlm-shap
+
 python -m spacy download en_core_web_sm
+python -m nltk.downloader all
 
 python faithfulness.py <c_task> <model_name> <num_samples> <save_json> <data_root>
 ```

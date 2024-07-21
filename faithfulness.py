@@ -62,10 +62,10 @@ else:
 tokenizer = AutoProcessor.from_pretrained(MODELS[model_name])
 print(f"Done loading model and tokenizer after {time.time()-t1:.2f}s.")
 
-# prompt = "USER: <image>\nWhat is this?\nASSISTANT:"
-# image_path = "/home/mitarb/parcalabescu/COCO/all_images/COCO_test2014_000000489547.jpg"
-# raw_image = Image.open(image_path)
-# print(vlm_generate(prompt, raw_image, model, tokenizer, max_new_tokens=max_new_tokens))
+prompt = "USER: <image>\nWhat is this?\nASSISTANT:"
+image_path = "./GQA/images/2389520.jpg"
+raw_image = Image.open(image_path)
+print(vlm_generate(prompt, raw_image, model, tokenizer, max_new_tokens=max_new_tokens))
 
 # prompt = "USER: <image>\nWhat is this? (A): a pizza, or (B): a dog. \nASSISTANT: The answer is: ("
 # image_path = "/home/mitarb/parcalabescu/COCO/all_images/COCO_test2014_000000489547.jpg"
@@ -73,10 +73,10 @@ print(f"Done loading model and tokenizer after {time.time()-t1:.2f}s.")
 # print(vlm_classify(prompt, raw_image, model, tokenizer, labels=['Y', 'X', 'A', 'B', 'var' ,'Y']))
 # print(f"This script so far (generation) needed {time.time()-t1:.2f}s.")
 
-# with torch.no_grad():
-#     helper_model = AutoModelForCausalLM.from_pretrained(MODELS['llama2-13b-chat'], torch_dtype=torch.float16, device_map="auto", token=True)
-# helper_tokenizer = AutoTokenizer.from_pretrained(MODELS['llama2-13b-chat'], use_fast=False, padding_side='left')
-# print(f"Loaded helper model {time.time()-t1:.2f}s.")
+with torch.no_grad():
+    helper_model = AutoModelForCausalLM.from_pretrained(MODELS['llama2-13b-chat'], torch_dtype=torch.float16, device_map="auto", token=True)
+helper_tokenizer = AutoTokenizer.from_pretrained(MODELS['llama2-13b-chat'], use_fast=False, padding_side='left')
+print(f"Loaded helper model {time.time()-t1:.2f}s.")
 
 # print(lm_generate('I enjoy walking with my cute dog.', helper_model, helper_tokenizer, max_new_tokens=max_new_tokens))
 
@@ -159,6 +159,8 @@ if __name__ == '__main__':
     print("Done preparing data. Running test...")
     for k, formatted_sample, correct_answer, wrong_answer, image_path in tqdm(zip(range(len(formatted_samples)), formatted_samples, correct_answers, wrong_answers, image_paths)):
         raw_image = Image.open(image_path) # read image
+        start_time = time.time()
+        print(f"Read image {image_path}.")
         if c_task in MULT_CHOICE_DATA.keys():
             labels = LABELS['binary']
         elif c_task in OPEN_ENDED_DATA.keys():
@@ -170,10 +172,13 @@ if __name__ == '__main__':
         prediction = vlm_predict(inp_ask_for_prediction, raw_image, model, tokenizer, c_task, labels=labels)
         accuracy_sample = evaluate_prediction(prediction, correct_answer, c_task)
         accuracy += accuracy_sample
+        print(f"finish compute model accuracy post-hoc after {time.time()-start_time} seconds")
+        
         # post-hoc explanation
         input_pred_ask_for_expl = prompt_post_hoc_expl_with_input(formatted_sample, prediction, c_task)
         input_pred_expl = vlm_generate(input_pred_ask_for_expl, raw_image, model, tokenizer, max_new_tokens=max_new_tokens, repeat_input=True)
-
+        print(f"finish post-hoc explanation after {time.time()-start_time} seconds")
+        
         # for accuracy with CoT: first let the model generate the cot, then the answer.
         input_ask_for_cot = prompt_cot_with_input(formatted_sample, c_task)
         input_cot = vlm_generate(input_ask_for_cot, raw_image, model, tokenizer, max_new_tokens=max_new_tokens, repeat_input=True)
@@ -181,15 +186,18 @@ if __name__ == '__main__':
         prediction_cot = vlm_predict(input_cot, raw_image, model, tokenizer, c_task, labels=labels)
         accuracy_cot_sample = evaluate_prediction(prediction_cot, correct_answer, c_task)
         accuracy_cot += accuracy_cot_sample
+        print(f"finish accuracy with CoT after {time.time()-start_time} seconds")
 
         # # post-hoc tests
         if 'atanasova_counterfactual' in TESTS:
             atanasova_counterfact, atanasova_counterfact_info = faithfulness_test_atanasova_etal_counterfact(formatted_sample, raw_image, prediction, model, tokenizer, c_task, helper_model, helper_tokenizer, labels)
         else: atanasova_counterfact, atanasova_counterfact_info = 0, 0
         if 'cc_shap-posthoc' in TESTS:
+            print("Running cc_shap-posthoc tests...")
             mm_score_post_hoc, mm_score_expl_post_hoc, score_post_hoc, dist_correl_ph, mse_ph, var_ph, kl_div_ph, js_div_ph, shap_plot_info_ph, tuple_shap_values_prediction = cc_shap_measure(inp_ask_for_prediction, prediction, input_pred_ask_for_expl, raw_image, model, tokenizer, c_task, tuple_shap_values_prediction=None, expl_type='post_hoc', max_new_tokens=max_new_tokens)
         else: mm_score_post_hoc, mm_score_expl_post_hoc, score_post_hoc, dist_correl_ph, mse_ph, var_ph, kl_div_ph, js_div_ph, shap_plot_info_ph = 0, 0, 0, 0, 0, 0, 0, 0, 0
-
+        print(f"finish post-hoc tests after {time.time()-start_time} seconds")
+        
         # # CoT tests
         if 'turpin' in TESTS:
             turpin, turpin_info = faithfulness_test_turpin_etal(formatted_sample, input_cot_ask_for_pred, prediction_cot, raw_image, prediction_cot, correct_answer, wrong_answer, model, tokenizer, c_task, helper_model, helper_tokenizer, labels, max_new_tokens=max_new_tokens)
@@ -200,7 +208,8 @@ if __name__ == '__main__':
         if 'cc_shap-cot' in TESTS:
             mm_score_cot, mm_score_expl_cot, score_cot, dist_correl_cot, mse_cot, var_cot, kl_div_cot, js_div_cot, shap_plot_info_cot, _ = cc_shap_measure(inp_ask_for_prediction, prediction, input_ask_for_cot, raw_image, model, tokenizer, c_task, tuple_shap_values_prediction, expl_type='cot', max_new_tokens=max_new_tokens)
         else: mm_score_cot, mm_score_expl_cot, score_cot, dist_correl_cot, mse_cot, var_cot, kl_div_cot, js_div_cot, shap_plot_info_cot = 0, 0, 0, 0, 0, 0, 0, 0, 0
-
+        print(f"finish CoT tests after {time.time()-start_time} seconds")
+        
         # aggregate results
         atanasova_counterfact_count += atanasova_counterfact
         cc_shap_post_hoc_sum += score_post_hoc
