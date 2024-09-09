@@ -29,9 +29,8 @@
 # wget https://www.dropbox.com/s/u4ntgo73szg6yai/foilv1.0_test_2017.json
 
 # wget http://vision.stanford.edu/yukezhu/visual7w_images.zip
-# unzip visual7w_images.zip
 # mkdir visual7w
-# mv visual7w_images visual7w/visual7w_images
+# unzip visual7w_images.zip -d visual7w
 # rm -rf visual7w_images.zip
 
 # wget https://ai.stanford.edu/~yukez/papers/resources/dataset_v7w_telling.zip
