@@ -63,7 +63,7 @@ tokenizer = AutoProcessor.from_pretrained(MODELS[model_name])
 print(f"Done loading model and tokenizer after {time.time()-t1:.2f}s.")
 
 prompt = "USER: <image>\nWhat is this?\nASSISTANT:"
-image_path = "./GQA/images/2389520.jpg"
+image_path = "./dataset/GQA/images/2389520.jpg"
 raw_image = Image.open(image_path)
 print(vlm_generate(prompt, raw_image, model, tokenizer, max_new_tokens=max_new_tokens))
 
@@ -132,8 +132,8 @@ if __name__ == '__main__':
                 count += 1
 
     elif c_task in OPEN_ENDED_DATA.keys(): # open ended generation tasks
-        images_path = f"{data_root}{OPEN_ENDED_DATA[c_task][0]}"
-        qa_path = f"{data_root}{OPEN_ENDED_DATA[c_task][1]}"
+        images_path = os.path.join(data_root, OPEN_ENDED_DATA[c_task][0])
+        qa_path = os.path.join(data_root, OPEN_ENDED_DATA[c_task][1])
         vqa_data = read_data(c_task, qa_path, images_path, data_root)
         for foil_id, foil in tqdm(vqa_data.items()):  # tqdm
             if count + 1 > num_samples:
@@ -159,6 +159,11 @@ if __name__ == '__main__':
     print("Done preparing data. Running test...")
     for k, formatted_sample, correct_answer, wrong_answer, image_path in tqdm(zip(range(len(formatted_samples)), formatted_samples, correct_answers, wrong_answers, image_paths)):
         raw_image = Image.open(image_path) # read image
+        
+        # ValueError: Unable to infer channel dimension format
+        if image_path.endswith('.png'):
+            raw_image = raw_image.convert("RGB")
+            
         start_time = time.time()
         print(f"Read image {image_path}.")
         if c_task in MULT_CHOICE_DATA.keys():

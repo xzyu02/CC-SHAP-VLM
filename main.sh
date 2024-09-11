@@ -1,1 +1,1 @@
-python faithfulness.py gqa llava_vicuna 300 1 ./dataset
+python faithfulness.py clevr llava_vicuna 5 1 ./dataset

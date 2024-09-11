@@ -38,3 +38,7 @@
 # unzip dataset_v7w_telling.zip -d visual7w
 # unzip dataset_v7w_pointing.zip -d visual7w
 # rm -rf dataset_v7w_telling.zip dataset_v7w_pointing.zip
+
+wget https://dl.fbaipublicfiles.com/clevr/CLEVR_v1.0.zip
+unzip CLEVR_v1.0.zip -d clevr
+rm -rf CLEVR_v1.0.zip

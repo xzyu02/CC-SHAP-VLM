@@ -1,10 +1,10 @@
 max_new_tokens = 100
 visualize = True
 TESTS = [
-    'atanasova_counterfactual',
+    # 'atanasova_counterfactual',
     'cc_shap-posthoc',
-    'turpin',
-    'lanham',
+    # 'turpin',
+    # 'lanham',
     'cc_shap-cot',
 ]
 
@@ -51,4 +51,5 @@ OPEN_ENDED_DATA = {
     "vqa": ["COCO/all_images/", "VQA2.0/v2_OpenEnded_mscoco_val2014_questions.json"],
     "gqa": ["GQA/images/", "GQA/val_all_questions.json"],
     "gqa_balanced": ["GQA/images/", "GQA/val_balanced_questions.json"],
+    "clevr": ["clevr/CLEVR_v1.0/images/train/", "clevr/CLEVR_v1.0/questions/CLEVR_train_questions.json"],
 }

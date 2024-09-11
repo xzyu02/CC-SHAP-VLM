@@ -1,6 +1,7 @@
 import json, random
 import os
 import numpy as np
+import pdb
 
 
 def read_data(instrument, foils_path, images_path, data_root):
@@ -10,6 +11,8 @@ def read_data(instrument, foils_path, images_path, data_root):
         foils_data = read_gqa(foils_path)
     elif instrument == "nlvr2":
         foils_data = read_nlvr2(foils_path, images_path)
+    elif instrument == "clevr":
+        foils_data = read_clevr(foils_path, images_path)
     elif "original-foil-dataset" in foils_path:
         foils_data = read_foil_dataset(foils_path)
     else:
@@ -109,6 +112,26 @@ def read_gqa(gqa_path):
     foils_data = {}
     split = 'val'
     np.random.seed(0)
+    
+    """
+    (Pdb) gqa_data['12344808']
+    {'semantic': [{'operation': 'select', 'dependencies': [], 'argument': 'boy (-)'},
+    {'operation': 'exist', 'dependencies': [0], 'argument': '?'},
+    {'operation': 'select', 'dependencies': [], 'argument': 'farmers (-) '},
+    {'operation': 'exist', 'dependencies': [2], 'argument': '?'},
+    {'operation': 'or', 'dependencies': [1, 3], 'argument': ''}],
+    'entailed': ['12344827', '12344556', '12344807', '12344828', '12344593', '12344679'],
+    'equivalent': ['12344808'],
+    'question': 'Are there either any farmers or boys in the picture?',
+    'imageId': '2399672',
+    'isBalanced': False,
+    'groups': {'global': None, 'local': '09existOr-boy_farmers'},
+    'answer': 'no',
+    'semanticStr': 'select: boy (-)->exist: ? [0]->select: farmers (-) ->exist: ? [2]->or:  [1, 3]',
+    'annotations': {'answer': {}, 'question': {}, 'fullAnswer': {}},
+    'types': {'detailed': 'existOrC', 'semantic': 'obj', 'structural': 'logical'},
+    'fullAnswer': 'No, there are no farmers or boys.'}
+    """
 
     with open(gqa_path) as json_file:
         gqa_data = json.load(json_file)
@@ -176,7 +199,39 @@ def read_nlvr2(nlvr_path, images_root):
                                             }
     return foils_data
 
+def read_clevr(clevr_path, images_root):
+    """
+    Read in the CLEVR data and transform it into our foiling format.
+
+    """
+    foils_data = {}
+    # pdb.set_trace()
+
+    with open(clevr_path) as json_file:
+        clevr_data = json.load(json_file)
+        # there are 70,000 images. Subsample 300 of them
+        np.random.seed(0)
+        subsample = np.random.choice(
+            len(clevr_data['questions']), 300, replace=False)
+        # print(foils_data.keys())
+        for i in subsample:
+            sample = clevr_data['questions'][i]
+            image_id = sample['image_index']
+            question = sample['question']
+            # print(image_id, question, question_id)
+            image_path = f'{sample["image_filename"]}'
+
+            if os.path.isfile(os.path.join(images_root, image_path)):
+                foils_data[image_id] = {'dataset': 'clevr',
+                                        'image_file': image_path,
+                                        'caption': question,
+                                        'answer': sample['answer']
+                                        }
+    return foils_data
 
 if __name__ == "__main__":
-    gqa = ["/scratch/GQA/images/", "/scratch/GQA/test_all_questions.json"]
-    read_data('gqa', gqa[1], gqa[0])
+    # gqa = ["./dataset/GQA/images/", "./dataset/GQA/val_all_questions.json"]
+    # read_data('gqa', gqa[1], gqa[0], "./dataset/")
+    clevr = ["./dataset/clevr/CLEVR_v1.0/images/train/",
+             "./dataset/clevr/CLEVR_v1.0/questions/CLEVR_train_questions.json"]
+    read_data('clevr', clevr[1], clevr[0], "./dataset/")
