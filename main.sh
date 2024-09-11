@@ -1,1 +1,1 @@
-python faithfulness.py clevr llava_vicuna 5 1 ./dataset
+CUDA_VISIBLE_DEVICES=4,5,6,7 python faithfulness.py clevr llava_vicuna 5 1 ./dataset

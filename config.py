@@ -5,7 +5,7 @@ TESTS = [
     'cc_shap-posthoc',
     # 'turpin',
     # 'lanham',
-    'cc_shap-cot',
+    # 'cc_shap-cot',
 ]
 
 MODELS = {

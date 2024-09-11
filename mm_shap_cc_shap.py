@@ -5,6 +5,7 @@ from sklearn import metrics
 import copy, random, math, sys
 import matplotlib as plt
 import shap
+import time
 
 from generation_and_prompting import *
 from config import *
@@ -83,6 +84,8 @@ def explain_VLM(prompt, raw_image, model, tokenizer, max_new_tokens=100, p=None)
             # output_ids.shape is (1, output_length); result.shape is (num_permutations, output_length)
             result = np.zeros((input_ids.shape[0], output_ids.shape[1]))
             
+            start_time = time.time()
+            
             # call the model for each "new image" generated with masked features
             for i in range(input_ids.shape[0]):
                 # here the actual masking of the image is happening. The custom masker only specified which patches to mask, but no actual masking has happened
@@ -96,7 +99,7 @@ def explain_VLM(prompt, raw_image, model, tokenizer, max_new_tokens=100, p=None)
                         # raw_image_array = raw_image_array[:, :, np.newaxis] 
                     raw_image_array = copy.deepcopy(raw_image_arr)
 
-                # pathify the image
+                # patchify the image
                 for k in range(masked_image_token_ids[i].shape[0]):
                     if masked_image_token_ids[i][k] == 0:  # should be zero
                         m = k // p
@@ -116,6 +119,8 @@ def explain_VLM(prompt, raw_image, model, tokenizer, max_new_tokens=100, p=None)
                 logits = out.logits[0].detach().cpu().numpy()
                 # extract only logits corresponding to target sentence ids
                 result[i] = logits[0, output_ids]
+            
+            print("It took {} seconds to predict the model.".format(time.time() - start_time))
         return result
 
     nb_text_tokens = inputs.input_ids.shape[1] # number of text tokens
